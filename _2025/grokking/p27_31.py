@@ -194,7 +194,7 @@ class P28_31(InteractiveScene):
             activations = pickle.load(f)
 
         all_svgs=Group()
-        for svg_file in svg_files[1:16]: #Expand if I add more artboards
+        for svg_file in svg_files[1:17]: #Expand if I add more artboards
             svg_image=SVGMobject(str(svg_file))
             all_svgs.add(svg_image[1:]) #Thowout background
 
@@ -224,7 +224,7 @@ class P28_31(InteractiveScene):
         draw_logits(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex, temperature=25.0)
         self.remove(all_svgs[7]); self.add(all_svgs[7])
 
-        self.add(all_svgs)
+        self.add(all_svgs[:15])
         self.wait()
 
         # Start p28
@@ -256,7 +256,7 @@ class P28_31(InteractiveScene):
         self.wait()
 
         #p29 new inpur
-        example_index=1
+        example_index=0
         draw_inputs(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.1)
         draw_embeddings(self, activations, all_svgs, reset=False, example_index=example_index, wait=0, colormap=black_to_tan_hex)
         draw_attention_values(self, activations, all_svgs, reset=False, example_index=example_index, wait=0, colormap=black_to_tan_hex)
@@ -340,10 +340,35 @@ class P28_31(InteractiveScene):
             all_pts.add(dese_pts)
 
 
+        self.wait()
+        self.play(Write(all_svgs[15]), Write(axes), run_time=4)
+        self.wait()
 
-        self.add(axes, all_pts)
+        # Ok this is loking dope. 
+        # Now how do I sweep through varoius inputs, while changing outputs and adding points to the scatter plot?
+
+        #We're on 0,0 go ahead and add this sucker
+        for i in range(7):
+            self.add(all_pts[i][0])
+            self.wait(0.1)
+        for i in range(1, p):
+            draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
+            draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            draw_attention_values(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            self.remove(all_svgs[7]); self.add(all_svgs[7])
+            draw_mlp_1(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            draw_mlp_2(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            for j in range(7):
+                self.add(all_pts[j][i])
+            self.wait(0.2)
+        self.wait()
 
 
+
+
+
+            # self.add(, all_pts)
 
 
         #Shoudl loopify this
