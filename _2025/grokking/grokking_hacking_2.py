@@ -102,8 +102,8 @@ class GrokkingHackingTwo(InteractiveScene):
         embedding_fill_indices_2=[28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48]
         embedding_fill_indices_3=[53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73]
         for i, indices in enumerate([embedding_fill_indices_1, embedding_fill_indices_2, embedding_fill_indices_3]):
-            vmin=np.min(activations['blocks.0.hook_resid_pre'][example_index][i])*1.2 #Scaling by column
-            vmax=np.max(activations['blocks.0.hook_resid_pre'][example_index][i])*1.2
+            vmin=np.min(activations['blocks.0.hook_resid_pre'][example_index][i])*1.5 #Scaling by column
+            vmax=np.max(activations['blocks.0.hook_resid_pre'][example_index][i])*1.5
             for j, idx in enumerate(indices):
                 # c=viridis_hex(activations['blocks.0.hook_resid_pre'][example_index, 0, i], vmin, vmax)
                 c=black_to_tan_hex(activations['blocks.0.hook_resid_pre'][example_index, i, j], vmin, vmax)
@@ -206,7 +206,8 @@ class GrokkingHackingTwo(InteractiveScene):
         self.wait()
 
         #Ok 50/50 still on activations in tan vs viridis - easy to change as I actually get into paragraph 25
-
+        #Alright building blocks are here
+        # Tempted to wrap stuff up now, but probably makes sense to wait until I get more into the script!
 
 
 
