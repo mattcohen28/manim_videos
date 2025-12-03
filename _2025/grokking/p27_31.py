@@ -180,7 +180,7 @@ def draw_logits(self, activations, all_svgs, reset=False, example_index=0, wait=
 
 
 svg_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/graphics/to_manim')
-data_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/from_linux/grok_1764602090')
+data_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/from_linux/grok_1764706121')
 
 
 class P28_31(InteractiveScene):
@@ -268,14 +268,14 @@ class P28_31(InteractiveScene):
 
 
 
-        activations['blocks.0.mlp.hook_pre'][example_index, 2, 0]
+        # activations['blocks.0.mlp.hook_pre'][example_index, 2, 0]
 
         activation_txt = VGroup()
         activation_arrows = VGroup()
 
         for i in range(7):
-            val = round(activations['blocks.0.mlp.hook_pre'][example_index, 2, i], 2)
-            txt = Tex(str(val), font_size=24)
+            val = activations['blocks.0.mlp.hook_pre'][example_index, 2, i]
+            txt = Tex(f"{val:.2f}", font_size=24)
             activation_txt.add(txt)
         activation_txt.set_color(FRESH_TAN)
         activation_txt.arrange(DOWN, buff=0.128)
@@ -318,7 +318,7 @@ class P28_31(InteractiveScene):
                     "include_ticks": False,
                     "include_numbers": False,
                     "include_tip": True,
-                    "stroke_width":3,
+                    "stroke_width":1.2,
                     "tip_config": {"width":0.02, "length":0.02}
                     }
                 )
@@ -327,14 +327,17 @@ class P28_31(InteractiveScene):
         axes.move_to([4.8, 0, 0])
 
         
+        #Hmm probably makes sense to remove mean here and from scatter plots - not a big deal.
+
         all_pts=VGroup()
-        activation_scaling=[0.25, 0.25, 0.25, 0.25, 0.18, 0.18,0.18] #Will probably need to noodle here a bit
-        neuron_indices=[0, 1, 2, 3, 4, 5, 6] #Assuming there will be some model tweaking here
+        neuron_indices=[0, 3, 4, 2, 11, 5, 9]
         for i, neuron_idx in enumerate(neuron_indices):
+            neuron_average=activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx].mean()
+            neuron_max=np.max(np.abs(activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx]-neuron_average))*1.0 #Might want to bring down
             dese_pts=VGroup()
             for j in range(p):
                 x = j / p
-                y = activations['blocks.0.mlp.hook_pre'][j, 2, i]*activation_scaling[i]
+                y = (activations['blocks.0.mlp.hook_pre'][j, 2, neuron_idx]-neuron_average)/neuron_max
                 pt = Dot(axes[i].c2p(x, y), radius=0.02, color=FRESH_TAN, stroke_width=0)
                 dese_pts.add(pt)
             all_pts.add(dese_pts)
@@ -370,13 +373,13 @@ class P28_31(InteractiveScene):
         # of the 49 scatter plots, I can make it reasonably clear what I'm doing without adding a buynch of labelling. 
         # Ok but first, let's color!
 
-        #My god this is slow lol
-        for i in range(1, p):
-            for j in range(7):
-                c=viridis_hex(i, 0, p)
-                all_pts[j][i].set_color(c)
-                self.wait(0.1)
-        self.wait()
+        #My god this is slow lol - removing temporarily
+        # for i in range(1, p):
+        #     for j in range(7):
+        #         c=viridis_hex(i, 0, p)
+        #         all_pts[j][i].set_color(c)
+        #         self.wait(0.1)
+        # self.wait()
 
 
         # Ok now for axes here, I think start with just making a 7x7 grid of axes with the same spacing
@@ -396,28 +399,61 @@ class P28_31(InteractiveScene):
                     "include_ticks": False,
                     "include_numbers": False,
                     "include_tip": True,
-                    "stroke_width": 1,
+                    "stroke_width": 1.2,
                     "tip_config": {"width": 0.02, "length": 0.02},
                 },
             )
             axes_2.add(a)
 
-        axes_2.arrange_in_grid(rows=7, cols=7, buff=0.2)
-        axes_2.move_to([6.4, 0, 0])
-
+        axes_2.arrange_in_grid(n_rows=7, n_cols=7, buff=0.2)
+        axes_2.move_to([10, 0, 0])
+        
 
         all_pts_2=VGroup()
-        activation_scaling=[0.25, 0.25, 0.25, 0.25, 0.18, 0.18,0.18] #Will probably need to noodle here a bit
-
         for i, neuron_idx_1 in enumerate(neuron_indices):
             for k, neuron_idx_2 in enumerate(neuron_indices):
                 dese_pts=VGroup()
+                neuron_average_x=activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx_1].mean()
+                neuron_average_y=activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx_2].mean()
+                neuron_max_x=np.max(np.abs(activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx_1]-neuron_average_x))*1.0 #Might want to bring down
+                neuron_max_y=np.max(np.abs(activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx_2]-neuron_average_y))*1.0 #Might want to bring down
                 for j in range(p):
-                    x = j / p
-                    y = activations['blocks.0.mlp.hook_pre'][j, 2, i]*activation_scaling[i]
-                    pt = Dot(axes[i].c2p(x, y), radius=0.02, stroke_width=0)
+                    x = (activations['blocks.0.mlp.hook_pre'][j, 2, neuron_idx_2]-neuron_average_y)/neuron_max_y
+                    y = (activations['blocks.0.mlp.hook_pre'][j, 2, neuron_idx_1]-neuron_average_x)/neuron_max_x
+                    pt = Dot(axes_2[len(neuron_indices)*i+k].c2p(x, y), radius=0.02, stroke_width=0)
+                    pt.set_color(viridis_hex(j, 0, p))
                     dese_pts.add(pt)
                 all_pts_2.add(dese_pts)
+
+        self.wait()
+
+        self.play(self.frame.animate.reorient(0, 0, 0, (7.62, 0.06, 0.0), 7.58),
+                  Write(axes_2), 
+                  run_time=4) #Pan over 
+        self.wait()
+
+        # self.add(all_pts_2[2])
+
+        # self.play(ReplacementTransform(all_pts[0].copy(), all_pts_2[3]), 
+        #           ReplacementTransform(all_pts[3].copy(), all_pts_2[3]))
+
+        self.add(all_pts_2)
+        self.remove(all_pts_2)
+
+        self.wait()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
