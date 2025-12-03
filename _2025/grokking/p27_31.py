@@ -4,6 +4,7 @@ from functools import partial
 from pathlib import Path
 import matplotlib.cm as cm
 import matplotlib.colors as colors
+from tqdm import tqdm
 
 CHILL_BROWN='#948979'
 YELLOW='#ffd35a'
@@ -434,13 +435,73 @@ class P28_31(InteractiveScene):
 
         # self.add(all_pts_2[2])
 
-        # self.play(ReplacementTransform(all_pts[0].copy(), all_pts_2[3]), 
-        #           ReplacementTransform(all_pts[3].copy(), all_pts_2[3]))
+        #P30 moves
+        self.play(self.frame.reorient(0, 0, 0, (6.27, 2.27, 0.0), 3.75), run_time=4)
+        self.wait()
+        self.play(ReplacementTransform(all_pts[0].copy(), all_pts_2[1]), 
+                  ReplacementTransform(all_pts[1].copy(), all_pts_2[1]), lag_ratio=0.1, run_time=4)
+        self.wait()
 
-        self.add(all_pts_2)
-        self.remove(all_pts_2)
+        #Hmm ok kinda thinkign about just fading in the rest actually? 
+        #Would be cool to bring all the points over, but given the timing and vibe of 
+        #this exploratory part of the script - feels overwhelming. 
+        self.play(self.frame.animate.reorient(0, 0, 0, (7.62, 0.06, 0.0), 7.58), 
+                  FadeIn(all_pts_2[0]), 
+                  FadeIn(all_pts_2[2:]),
+                  run_time=4) #Zoom back out
 
         self.wait()
+        # self.add(all_pts_2)
+        # self.remove(all_pts_2)
+
+        #P31 - Ok, now roll back the clock on all these plots -> let's go! 500 or 1000 is probably good, let's target 500. 
+        activation_history=np.load(str(data_dir/'time_history_mlp_hook_pre_1.npy'))
+        #activation_history.shape (2000, 113, 3, 512)
+        
+
+        for step_count in tqdm(np.arange(1999, -1, -1)):
+            all_pts_old=all_pts
+            all_pts_2_old=all_pts_2
+
+            all_pts=VGroup()
+            for i, neuron_idx in enumerate(neuron_indices):
+                neuron_average=activation_history[step_count, :p, 2, neuron_idx].mean()
+                neuron_max=np.max(np.abs(activation_history[step_count, :p, 2, neuron_idx]-neuron_average))*1.0 
+                dese_pts=VGroup()
+                for j in range(p):
+                    x = j / p
+                    y = (activation_history[step_count, j, 2, neuron_idx]-neuron_average)/neuron_max
+                    pt = Dot(axes[i].c2p(x, y), radius=0.02, color=FRESH_TAN, stroke_width=0)
+                    pt.set_color(viridis_hex(j, 0, p))
+                    dese_pts.add(pt)
+                all_pts.add(dese_pts)
+
+
+            all_pts_2=VGroup()
+            for i, neuron_idx_1 in enumerate(neuron_indices):
+                for k, neuron_idx_2 in enumerate(neuron_indices):
+                    dese_pts=VGroup()
+                    neuron_average_x=activation_history[step_count, :p, 2, neuron_idx_1].mean()
+                    neuron_average_y=activation_history[step_count, :p, 2, neuron_idx_2].mean()
+                    neuron_max_x=np.max(np.abs(activation_history[step_count, :p, 2, neuron_idx_1]-neuron_average_x))*1.0 #Might want to bring down
+                    neuron_max_y=np.max(np.abs(activation_history[step_count, :p, 2, neuron_idx_2]-neuron_average_y))*1.0 #Might want to bring down
+                    for j in range(p):
+                        x = (activation_history[step_count, j, 2, neuron_idx_2]-neuron_average_y)/neuron_max_y
+                        y = (activation_history[step_count, j, 2, neuron_idx_1]-neuron_average_x)/neuron_max_x
+                        pt = Dot(axes_2[len(neuron_indices)*i+k].c2p(x, y), radius=0.02, stroke_width=0)
+                        pt.set_color(viridis_hex(j, 0, p))
+                        dese_pts.add(pt)
+                    all_pts_2.add(dese_pts)
+            self.remove(all_pts_old, all_pts_2_old)
+            self.add(all_pts, all_pts_2)
+            self.wait(0.2)
+
+
+        self.wait(20)
+        self.embed()
+
+            
+            
 
 
 
@@ -511,7 +572,4 @@ class P28_31(InteractiveScene):
 
 
 
-
-        self.wait(20)
-        self.embed()
 
