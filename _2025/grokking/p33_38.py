@@ -472,6 +472,8 @@ class P34_38(InteractiveScene):
 
         # wave_label_4.scale(1.5)
         # wave_label_4.move_to([-0.85, 3.6, 0])
+        # Make logit match what we're currently showing
+        draw_logits(self, activations, all_svgs, reset=False, example_index=111, wait=0, colormap=black_to_tan_hex, temperature=25.0)
 
         self.wait()
         self.remove(pts_probe_1)
@@ -498,21 +500,90 @@ class P34_38(InteractiveScene):
 
         #Ok getting close to this milestone!!
 
+        sparse_probe_2=np.load(data_dir/'sparse_probe_2.npy')
+        sparse_probe_3=np.load(data_dir/'sparse_probe_3.npy')
+        sparse_probe_4=np.load(data_dir/'sparse_probe_4.npy')
+
+        pts_curve_2b=[]
+        for j in range(p):
+            x = j / p
+            y = sparse_probe_2[j]
+            pts_curve_2b.append(axes[0].c2p(x, y))
+        curve_2b = VMobject(stroke_width=3)
+        curve_2b.set_points_smoothly(pts_curve_2b)
+        curve_2b.set_color(MAGENTA)
+
+        wave_label_2b = Tex(r'\sin \big(\tfrac{8\pi}{113}x\big)')
+        wave_label_2b.set_color(MAGENTA)
+        wave_label_2b.scale(0.45*1.5)
+        wave_label_2b.move_to([-0.9, 2.6, 0])
+
+        self.play(ShowCreation(curve_2b), run_time=3)
+        self.add(wave_label_2b)
+        self.wait()
 
 
-        # self.remove(all_svgs[18])
+        #Ok sparse probes for y and this scene will be done!
 
-        # self.add(curve_3)
-        # self.add(wave_label_4)
+        # axis_2=axes[0].copy()
+        axis_2 = Axes(
+            x_range=[0, 1.0, 1],
+            y_range=[-1.0, 1.0, 1],
+            width=2*2.4,
+            height=2*0.56,
+            axis_config={
+                "color": CHILL_BROWN,
+                "include_ticks": False,
+                "include_numbers": False,
+                "include_tip": True,
+                "stroke_width":1.8,
+                "tip_config": {"width":0.02, "length":0.02}
+                }
+            )
+        axis_2.move_to([-4, -2.85, 0])
+        y_label=Tex('y', font_size=24)
+        y_label.set_color(CHILL_BROWN)
+        y_label.next_to(axis_2, RIGHT, buff=0.1)
+        y_label.shift([0, -0.1, 0])
 
-        # self.remove(wave_label_4)
 
-        # self.remove(curve_3)
-        # self.add(all_pts)
-        # self.add(axes)
-        # self.remove(axes)
+        pts_curve_3=[]
+        for j in range(p):
+            x = j / p
+            y = sparse_probe_3[j]
+            pts_curve_3.append(axis_2.c2p(x, y))
+        curve_3 = VMobject(stroke_width=3)
+        curve_3.set_points_smoothly(pts_curve_3)
+        curve_3.set_color(CYAN)
+
+        wave_label_3 = Tex(r'\cos \big(\tfrac{8\pi}{113}y\big)')
+        wave_label_3.set_color(CYAN)
+        wave_label_3.scale(0.45*1.5)
+        wave_label_3.move_to([-0.9, -2.2, 0])
 
 
+        pts_curve_4=[]
+        for j in range(p):
+            x = j / p
+            y = sparse_probe_4[j]
+            pts_curve_4.append(axis_2.c2p(x, y))
+        curve_4 = VMobject(stroke_width=3)
+        curve_4.set_points_smoothly(pts_curve_4)
+        curve_4.set_color(RED)
+
+        wave_label_4 = Tex(r'\sin \big(\tfrac{8\pi}{113}y\big)')
+        wave_label_4.set_color(RED)
+        wave_label_4.scale(0.45*1.5)
+        wave_label_4.move_to([-0.9, -3.2, 0])
+
+
+        self.wait()
+
+        self.play(Write(all_svgs[18][21:]), ShowCreation(axis_2), run_time=2.5)
+        self.play(ShowCreation(curve_3), ShowCreation(curve_4), run_time=5.0)
+        self.add(wave_label_3, wave_label_4)
+        self.wait()
+    
 
         self.wait()
 
