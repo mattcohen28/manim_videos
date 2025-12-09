@@ -233,6 +233,17 @@ class Dot3D(Sphere):
         self.move_to(center)
 
 
+def make_fourier_surf_func(axes, comp_func):
+    def func(u, v):
+        i = u * 113  # Map u from [0,1] to [0,113]
+        j = v * 113  # Map v from [0,1] to [0,113]
+        x = i
+        y = j
+        z = comp_func(i, j)
+        return axes.c2p(x, y, z)
+    return func
+
+
 class P44_50(InteractiveScene):
     def construct(self): 
 
@@ -508,7 +519,7 @@ class P45_3D(InteractiveScene):
             z_range=[-1, 1, 1],
             width=4,
             height=4,
-            depth=2,
+            depth=1.4,
             axis_config={
                 "color": CHILL_BROWN,
                 "include_ticks": False,
@@ -541,6 +552,8 @@ class P45_3D(InteractiveScene):
         # x_sweep=mlp_hook_pre[:,0,2,neuron_idx_1]
         neuron_1_mean=np.mean(mlp_hook_pre[:,:,2, neuron_idx_1])-0.20 #Eh?
 
+
+
         pts_1_x=Group()
         for j in range(p):
             x = j
@@ -557,21 +570,226 @@ class P45_3D(InteractiveScene):
             pt.set_color(FRESH_TAN)
             pts_1_y.add(pt)
 
+        # all_pts=Group()
+        # print('building point grid...')
+        # for i in tqdm(range(p)):
+        #     for j in range(5):
+        #         y = (mlp_hook_pre[i, j, 2, neuron_idx_1]-neuron_1_mean)
+        #         pt = Dot3D(axes_1.c2p(i, j, y), radius=0.02) #, color=FRESH_TAN, stroke_width=0)
+        #         pt.set_color(FRESH_TAN)
+        #         all_pts.add(pt)
+
+
         # self.frame.reorient(0, 89, 0, (1.19, 0.17, 0.09), 9.02)
         self.frame.reorient(0, 90, 0)
         self.add(axes_1[0], x_label, axes_1[2]) #No y-label yet, just x. 
         self.wait()
-        self.add(pts_1_x)
 
-        self.add(axes_1[1], y_label, pts_1_y)
+        # Turn back on before final render 
+        # for i in range(p):
+        #     self.add(pts_1_x[i])
+        #     self.wait(0.2)
+
+        self.wait()
+
+        self.play(self.frame.animate.reorient(92, 79, 0, (-0.48, -0.58, -0.02), 6.58), 
+                  ShowCreation(axes_1[1]), ShowCreation(y_label), 
+                  x_label.animate.rotate(180*DEGREES, [0,0,1]), run_time=5)
+        self.wait()
+
+        # Turn back on before final render
+        # for i in range(p):
+        #     self.add(pts_1_y[i])
+        #     self.wait(0.2)
+
+        self.wait()
+
+        #Ok so I want to do the grid of all points, but this seems prohibitevely slow
+        # Skippin gofr now. 
+        # self.add(all_pts)
+
+        # #Now add all points, then surface. 
+        # self.play(ShowCreation(all_pts), 
+        #          # self.frame.animate.reorient(92, 79, 0, (-0.48, -0.58, -0.02), 6.58),
+        #          run_time=5)
+
+        # self.wait()
+
+        surf_func_with_axes = partial(
+            surf_func, 
+            axes=axes_1,
+            surf_array=mlp_hook_pre[:,:,2,neuron_idx_1]-neuron_1_mean, 
+            scale=1.0
+        )
+
+        surface = ParametricSurface(
+            surf_func_with_axes,  
+            u_range=[0, 1.0],
+            v_range=[0, 1.0],
+            resolution=(resolution, resolution),
+        )
+
+        ts = TexturedSurface(surface, str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'.png')))
+        ts.set_shading(0.0, 0.1, 0)
+        ts.set_opacity(0.8)
+
+        self.wait()
+
+        #Pan around to get ready for reveal
+        self.play(self.frame.animate.reorient(31, 70, 0, (-0.19, -0.28, -0.29), 6.60), run_time=4)
+
+        self.wait()
+        self.play(ShowCreation(ts), 
+                  self.frame.animate.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05), 
+                  run_time=10)
+
+
+        # self.frame.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05)
+        # Ok now the "break apart" into multiple frequencies. 
+        # This should be interesting. 
+        # Let me try all 4, then if that's a problem I'll remove the second freq. 
+        # Might not be a bad thing to throw at the AIs. 
+
+        #Ok, not sure why this is happening, but I'm having trouble with the heatmap
+        #of the second component. I'm also realizing that this is just a 
+        #negative frequency component, k=-4. 
+        #I think I'm going to leave it out and put a technical footnote. 
+        
+        fourier_funcs = [
+            lambda i, j: 0.354 * np.cos(2*np.pi*((4*i)/113) - 0.516) * np.cos(2*np.pi*((4*j)/113) - 0.516),
+            # lambda i, j: 0.26 * np.cos(2*np.pi*((4*i)/113)) * np.cos(2*np.pi*((109*j)/113)), #Oh interesting this is a negative freq. Right. 
+            lambda i, j: 0.173 * np.cos(2*np.pi*((8*i)/113) + 2.653),
+            lambda i, j: 0.173 * np.cos(2*np.pi*((8*j)/113) + 2.653),
+        ]
+
+
+        vertical_spacing = 1.7
+        axes_scale = 1.0
+
+        # Create axes for the components
+        component_axes = Group()
+        labels = VGroup()
+        
+        for k in range(3):
+            ax = ThreeDAxes(
+                x_range=[0, p, 10],
+                y_range=[0, p, 10],
+                z_range=[-0.5, 0.5, 0.5],
+                width=4 * axes_scale,
+                height=4 * axes_scale,
+                depth=1.4 * axes_scale,
+                axis_config={
+                    "color": CHILL_BROWN,
+                    "include_ticks": False,
+                    "include_numbers": False,
+                    "include_tip": True,
+                    "stroke_width": 2,
+                    "tip_config": {"width": 0.04, "length": 0.04}
+                }
+            )
+
+            x_label = Tex("x", font_size=32).next_to(axes_1.x_axis.get_end(), RIGHT, buff=0.1).set_color(CHILL_BROWN)
+            y_label = Tex("y", font_size=32).next_to(axes_1.y_axis.get_end(), UP, buff=0.1).set_color(CHILL_BROWN)
+            x_label.rotate(DEGREES*90, [1, 0, 0])
+            y_label.rotate(DEGREES*90, [1, 0, 0])
+            y_label.rotate(DEGREES*90, [0, 0, 1])
+            x_label.rotate(DEGREES*180, [0, 0, 1])
+            x_label.shift([0,0,-vertical_spacing * k])
+            y_label.shift([0,0,-vertical_spacing * k])
+            ax[0].rotate(DEGREES * 90, [1, 0, 0])
+            ax[1].rotate(DEGREES * 90, [0, 1, 0])
+
+            ax.move_to([0, 0, -vertical_spacing * k + 0.0])
+            component_axes.add(ax)
+            labels.add(VGroup(x_label, y_label))
+
+        self.add(component_axes)
+
+        # Create surfaces directly from the Fourier functions
+        component_surfaces = Group()
+        
+        for i, ax, func in zip(np.arange(len(component_axes)), component_axes, fourier_funcs):
+            surf = ParametricSurface(
+                make_fourier_surf_func(ax, func),
+                u_range=[0, 1.0],
+                v_range=[0, 1.0],
+                resolution=(resolution, resolution),
+            )
+            # print(str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'_component_'+str(i)+'.png')))
+            ts_temp = TexturedSurface(surf, str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'_component_'+str(i)+'.png')))
+            ts_temp.set_shading(0.0, 0.1, 0)
+            ts_temp.set_opacity(0.8)
+            component_surfaces.add(ts_temp)
+
+
+        self.wait()
+
+        # Ok should be setup pretty well here to do a nice little animation!
+        # Gotta add nice function labels too - probaly try in manim first, fall back to AI
+
+
+
+
+        self.add(component_surfaces)
+        self.add(labels)
+        self.remove(ts)
+
+
+        self.remove(component_surfaces)
 
         
 
 
 
 
-        self.wait()
 
+
+
+
+        # self.remove(component_axes)
+
+        # Labels for each component - might do this a differet way, we'll see. 
+        label_texts = [
+            r'\cos(\tfrac{8\pi x}{113})\cos(\tfrac{8\pi y}{113})',
+            r'\cos(\tfrac{8\pi x}{113})\cos(\tfrac{218\pi y}{113})',
+            r'\cos(\tfrac{16\pi x}{113})',
+            r'\cos(\tfrac{16\pi y}{113})'
+        ]
+        label_colors = [YELLOW, MAGENTA, CYAN, RED]
+        
+        component_labels = []
+        for k, (txt, col) in enumerate(zip(label_texts, label_colors)):
+            lbl = Tex(txt, font_size=24)
+            lbl.set_color(col)
+            lbl.rotate(DEGREES * 90, [1, 0, 0])
+            lbl.move_to([6, -vertical_spacing * k + 4.5 + 1.2, 0.8])
+            component_labels.append(lbl)
+
+
+
+
+
+        self.play(
+            self.frame.animate.reorient(145, 45, 0, (2.5, 0.0, -0.5), 12.0),
+            run_time=3
+        )
+
+        for k in range(4):
+            self.play(
+                ShowCreation(component_axes[k]),
+                ShowCreation(component_labels[k]),
+                run_time=1
+            )
+            self.play(
+                ShowCreation(component_surfaces[k]),
+                run_time=2
+            )
+            self.wait(0.5)
+
+
+
+
+        # self.remove(ts)
 
 
 
