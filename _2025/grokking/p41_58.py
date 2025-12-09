@@ -631,6 +631,7 @@ class P45_3D(InteractiveScene):
 
         ts = TexturedSurface(surface, str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'.png')))
         ts.set_shading(0.0, 0.1, 0)
+        # ts.set_shading(0.1, 0.5, 0.1)
         ts.set_opacity(0.8)
 
         self.wait()
@@ -658,8 +659,8 @@ class P45_3D(InteractiveScene):
         fourier_funcs = [
             lambda i, j: 0.354 * np.cos(2*np.pi*((4*i)/113) - 0.516) * np.cos(2*np.pi*((4*j)/113) - 0.516),
             # lambda i, j: 0.26 * np.cos(2*np.pi*((4*i)/113)) * np.cos(2*np.pi*((109*j)/113)), #Oh interesting this is a negative freq. Right. 
-            lambda i, j: 0.173 * np.cos(2*np.pi*((8*i)/113) + 2.653),
             lambda i, j: 0.173 * np.cos(2*np.pi*((8*j)/113) + 2.653),
+            lambda i, j: 0.173 * np.cos(2*np.pi*((8*i)/113) + 2.653),
         ]
 
 
@@ -669,6 +670,8 @@ class P45_3D(InteractiveScene):
         # Create axes for the components
         component_axes = Group()
         labels = VGroup()
+        
+
         
         for k in range(3):
             ax = ThreeDAxes(
@@ -688,27 +691,28 @@ class P45_3D(InteractiveScene):
                 }
             )
 
-            x_label = Tex("x", font_size=32).next_to(axes_1.x_axis.get_end(), RIGHT, buff=0.1).set_color(CHILL_BROWN)
-            y_label = Tex("y", font_size=32).next_to(axes_1.y_axis.get_end(), UP, buff=0.1).set_color(CHILL_BROWN)
-            x_label.rotate(DEGREES*90, [1, 0, 0])
-            y_label.rotate(DEGREES*90, [1, 0, 0])
-            y_label.rotate(DEGREES*90, [0, 0, 1])
-            x_label.rotate(DEGREES*180, [0, 0, 1])
-            x_label.shift([0,0,-vertical_spacing * k])
-            y_label.shift([0,0,-vertical_spacing * k])
+            x_label_temp = Tex("x", font_size=32).next_to(axes_1.x_axis.get_end(), RIGHT, buff=0.1).set_color(CHILL_BROWN)
+            y_label_temp = Tex("y", font_size=32).next_to(axes_1.y_axis.get_end(), UP, buff=0.1).set_color(CHILL_BROWN)
+            x_label_temp.rotate(DEGREES*90, [1, 0, 0])
+            y_label_temp.rotate(DEGREES*90, [1, 0, 0])
+            y_label_temp.rotate(DEGREES*90, [0, 0, 1])
+            x_label_temp.rotate(DEGREES*180, [0, 0, 1])
+            x_label_temp.shift([0,0,-vertical_spacing * (k+1)])
+            y_label_temp.shift([0,0,-vertical_spacing * (k+1)])
             ax[0].rotate(DEGREES * 90, [1, 0, 0])
             ax[1].rotate(DEGREES * 90, [0, 1, 0])
 
-            ax.move_to([0, 0, -vertical_spacing * k + 0.0])
+            ax.move_to([0, 0, -vertical_spacing * (k+1) + 0.0])
             component_axes.add(ax)
-            labels.add(VGroup(x_label, y_label))
+            labels.add(VGroup(x_label_temp, y_label_temp))
 
-        self.add(component_axes)
+        
 
         # Create surfaces directly from the Fourier functions
+        surface_colors = [ORANGE, YELLOW, CYAN]
         component_surfaces = Group()
         
-        for i, ax, func in zip(np.arange(len(component_axes)), component_axes, fourier_funcs):
+        for i, ax, func, color in zip(np.arange(len(component_axes)), component_axes, fourier_funcs, surface_colors):
             surf = ParametricSurface(
                 make_fourier_surf_func(ax, func),
                 u_range=[0, 1.0],
@@ -716,75 +720,48 @@ class P45_3D(InteractiveScene):
                 resolution=(resolution, resolution),
             )
             # print(str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'_component_'+str(i)+'.png')))
-            ts_temp = TexturedSurface(surf, str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'_component_'+str(i)+'.png')))
-            ts_temp.set_shading(0.0, 0.1, 0)
-            ts_temp.set_opacity(0.8)
-            component_surfaces.add(ts_temp)
+            # ts_temp = TexturedSurface(surf, str(data_dir/('activations_'+str(neuron_idx_1).zfill(3)+'_component_'+str(i)+'.png')))
+            # ts_temp.set_shading(0.0, 0.1, 0)
+            # ts_temp.set_opacity(0.8)
+            # component_surfaces.add(ts_temp)
+            surf.set_color(color).set_shading(0.1, 0.5, 0.5)
+            component_surfaces.add(surf)
 
-
-        self.wait()
 
         # Ok should be setup pretty well here to do a nice little animation!
         # Gotta add nice function labels too - probaly try in manim first, fall back to AI
+        # Alright alright how to animate this sucker...
+
+        surf_copy_2=surface.copy().set_color(YELLOW).shift([0, 0, -0.001])
+        surf_copy_1=surface.copy().set_color(CYAN).shift([0, 0, -0.001])
+        surf_copy_0=surface.copy().set_color(ORANGE).shift([0, 0, -0.001])
+        # surf_copy_2.shift([0, 0, -0.1])
+
+        self.wait()
+
+        self.add(surf_copy_2, surf_copy_1, surf_copy_0)
+        self.remove(ts); self.add(ts)
+        self.play(ReplacementTransform(surf_copy_2, component_surfaces[2]), 
+                  ReplacementTransform(axes_1.copy(), component_axes[2]), 
+                  ReplacementTransform(surf_copy_1, component_surfaces[1]), 
+                  ReplacementTransform(axes_1.copy(), component_axes[1]), 
+                  ReplacementTransform(surf_copy_0, component_surfaces[0]), 
+                  ReplacementTransform(axes_1.copy(), component_axes[0]), 
+                  ReplacementTransform(x_label.copy(), labels[0][0]),
+                  ReplacementTransform(x_label.copy(), labels[1][0]),
+                  ReplacementTransform(x_label.copy(), labels[2][0]),
+                  ReplacementTransform(y_label.copy(), labels[0][1]),
+                  ReplacementTransform(y_label.copy(), labels[1][1]),
+                  ReplacementTransform(y_label.copy(), labels[2][1]),
+                  self.frame.animate.reorient(137, 59, 0, (0.28, 0.08, -2.34), 8.54), 
+                  run_time=4)
+        self.remove(component_surfaces); self.add(component_surfaces)
+        # self.add(labels)
+        self.wait()
 
 
 
 
-        self.add(component_surfaces)
-        self.add(labels)
-        self.remove(ts)
-
-
-        self.remove(component_surfaces)
-
-        
-
-
-
-
-
-
-
-
-        # self.remove(component_axes)
-
-        # Labels for each component - might do this a differet way, we'll see. 
-        label_texts = [
-            r'\cos(\tfrac{8\pi x}{113})\cos(\tfrac{8\pi y}{113})',
-            r'\cos(\tfrac{8\pi x}{113})\cos(\tfrac{218\pi y}{113})',
-            r'\cos(\tfrac{16\pi x}{113})',
-            r'\cos(\tfrac{16\pi y}{113})'
-        ]
-        label_colors = [YELLOW, MAGENTA, CYAN, RED]
-        
-        component_labels = []
-        for k, (txt, col) in enumerate(zip(label_texts, label_colors)):
-            lbl = Tex(txt, font_size=24)
-            lbl.set_color(col)
-            lbl.rotate(DEGREES * 90, [1, 0, 0])
-            lbl.move_to([6, -vertical_spacing * k + 4.5 + 1.2, 0.8])
-            component_labels.append(lbl)
-
-
-
-
-
-        self.play(
-            self.frame.animate.reorient(145, 45, 0, (2.5, 0.0, -0.5), 12.0),
-            run_time=3
-        )
-
-        for k in range(4):
-            self.play(
-                ShowCreation(component_axes[k]),
-                ShowCreation(component_labels[k]),
-                run_time=1
-            )
-            self.play(
-                ShowCreation(component_surfaces[k]),
-                run_time=2
-            )
-            self.wait(0.5)
 
 
 
