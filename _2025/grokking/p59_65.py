@@ -244,28 +244,69 @@ def make_fourier_surf_func(axes, comp_func):
     return func
 
 
-
-
-class P59(InteractiveScene):
+class P59_mlp_surface_1(InteractiveScene):
     def construct(self): 
-        p=113
 
-        '''
-        Ok not quite sure how I want to architect this last big scene just yet
-        I think it's probably (6) different scenes, 4 surfaces, two probe plots
-        And I guess we have a bunch of model checkpoints...
-        So I'll probably actually load up checkpoints here and do my own little forward pass? 
-        I think that's the vibe...
-        '''
+        ckpt_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/from_linux/grok_1764706121')
+        neuron_idx=341
+
+        mlp_pre=np.load(data_dir/('training_mlp_pre_'+str(neuron_idx)+'.npy'))
+
+        axes_1 = ThreeDAxes(
+            x_range=[0, p, 10],
+            y_range=[0, p, 10],
+            z_range=[-1, 1, 1],
+            width=4,
+            height=4,
+            depth=1.4,
+            axis_config={
+                "color": CHILL_BROWN,
+                "include_ticks": False,
+                "include_numbers": False,
+                "include_tip": True,
+                "stroke_width":2,
+                "tip_config": {"width":0.05, "length":0.05}
+                }
+        )
+
+        x_label = Tex("x", font_size=32).next_to(axes_1.x_axis.get_end(), RIGHT, buff=0.1).set_color(CHILL_BROWN)
+        y_label = Tex("y", font_size=32).next_to(axes_1.y_axis.get_end(), UP, buff=0.1).set_color(CHILL_BROWN)
+        axes_1_group=VGroup(axes_1, x_label, y_label)
+        x_label.rotate(DEGREES*90, [1, 0, 0])
+        y_label.rotate(DEGREES*90, [1, 0, 0])
+        y_label.rotate(DEGREES*90, [0, 0, 1])
+        axes_1[0].rotate(DEGREES*90, [1, 0, 0])
+        axes_1[1].rotate(DEGREES*90, [0, 1, 0])
 
 
+        self.frame.reorient(43, 57, 0, (-0.15, -0.07, -0.33), 6.60)
+        self.add(axes_1_group)
 
-        
+        for time_step in range(1000):
+            neuron_1_mean=np.mean(mlp_pre[time_step, :, :])
+            neuron_1_max=np.max(np.abs(mlp_pre[time_step, :, :]-neuron_1_mean))
 
+            surf_func_with_axes = partial(
+                surf_func, 
+                axes=axes_1,
+                surf_array=(mlp_pre[time_step, :, :]-neuron_1_mean)/neuron_1_max, 
+                scale=1.0
+            )
 
+            surface = ParametricSurface(
+                surf_func_with_axes,  
+                u_range=[0, 1.0],
+                v_range=[0, 1.0],
+                resolution=(resolution, resolution),
+            )
 
+            ts = TexturedSurface(surface, str(data_dir/'training_heatmaps'/('mlp_pre_'+str(train_step).zfill(4)+'_'+str(neuron_idx).zfill(3)+'.png')))
+            ts.set_shading(0.0, 0.1, 0)
+            ts.set_opacity(0.8)
 
-
+            self.add(ts)
+            self.wait(0.1)
+            self.remove(ts)
 
 
 
@@ -275,6 +316,158 @@ class P59(InteractiveScene):
 
 
 
+
+
+
+class P59_probe_1(InteractiveScene):
+    def construct(self): 
+
+        ckpt_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/from_linux/grok_1764706121')
+
+        p=113
+
+        '''
+        Ok not quite sure how I want to architect this last big scene just yet
+        I think it's probably (6) different scenes, 4 surfaces, two probe plots
+        And I guess we have a bunch of model checkpoints...
+        So I'll probably actually load up checkpoints here and do my own little forward pass? 
+        I think that's the vibe...
+        Ok I think running model on Mac is probably not the move actually, 
+        let me jump to linux and export what I need for these 6 animations. 
+
+        '''
+
+        
+        probe_cos_0=np.load(data_dir/'training_sparse_probe_cos_0.npy')
+        probe_sin_0=np.load(data_dir/'training_sparse_probe_sin_0.npy')
+        # probe_cos_1=np.load(data_dir/'training_sparse_probe_cos_1.npy')
+        # probe_sin_1=np.load(data_dir/'training_sparse_probe_sin_1.npy')
+
+
+        axis_1 = Axes(
+            x_range=[0, 1.0, 1],
+            y_range=[-1.0, 1.0, 1],
+            width=2*2.4,
+            height=2*0.56,
+            axis_config={
+                "color": CHILL_BROWN,
+                "include_ticks": False,
+                "include_numbers": False,
+                "include_tip": True,
+                "stroke_width":1.8,
+                "tip_config": {"width":0.02, "length":0.02}
+                }
+            )
+
+        # axis_1.move_to([-4, 3.05, 0])
+        x_label=Tex('x', font_size=24)
+        x_label.set_color(CHILL_BROWN)
+        x_label.next_to(axis_1, RIGHT, buff=0.1)
+        x_label.shift([0, -0.1, 0])
+
+        self.add(axis_1, x_label)
+        for time_step in range(1000):
+
+            pts_curve_1=[]
+            for j in range(p):
+                x = j / p
+                y = probe_cos_0[time_step][j]
+                pts_curve_1.append(axis_1.c2p(x, y))
+
+            curve_1 = VMobject(stroke_width=3)
+            curve_1.set_points_smoothly(pts_curve_1)
+            curve_1.set_color(YELLOW)
+
+            pts_curve_2=[]
+            for j in range(p):
+                x = j / p
+                y = probe_sin_0[time_step][j]
+                pts_curve_2.append(axis_1.c2p(x, y))
+
+            curve_2 = VMobject(stroke_width=3)
+            curve_2.set_points_smoothly(pts_curve_2)
+            curve_2.set_color(MAGENTA)
+        
+
+            self.add(curve_1, curve_2)
+            self.wait(0.1)
+            self.remove(curve_1, curve_2)
+
+
+
+
+
+        self.wait(20)
+        self.embed() 
+
+
+
+class P59_probe_2(InteractiveScene):
+    def construct(self): 
+
+        ckpt_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/grokking/from_linux/grok_1764706121')
+
+        p=113
+
+        probe_cos_1=np.load(data_dir/'training_sparse_probe_cos_1.npy')
+        probe_sin_1=np.load(data_dir/'training_sparse_probe_sin_1.npy')
+
+
+        axis_1 = Axes(
+            x_range=[0, 1.0, 1],
+            y_range=[-1.0, 1.0, 1],
+            width=2*2.4,
+            height=2*0.56,
+            axis_config={
+                "color": CHILL_BROWN,
+                "include_ticks": False,
+                "include_numbers": False,
+                "include_tip": True,
+                "stroke_width":1.8,
+                "tip_config": {"width":0.02, "length":0.02}
+                }
+            )
+
+        # axis_1.move_to([-4, 3.05, 0])
+        x_label=Tex('x', font_size=24)
+        x_label.set_color(CHILL_BROWN)
+        x_label.next_to(axis_1, RIGHT, buff=0.1)
+        x_label.shift([0, -0.1, 0])
+
+        self.add(axis_1, x_label)
+        for time_step in range(1000):
+
+            pts_curve_1=[]
+            for j in range(p):
+                x = j / p
+                y = probe_cos_1[time_step][j]
+                pts_curve_1.append(axis_1.c2p(x, y))
+
+            curve_1 = VMobject(stroke_width=3)
+            curve_1.set_points_smoothly(pts_curve_1)
+            curve_1.set_color(CYAN)
+
+            pts_curve_2=[]
+            for j in range(p):
+                x = j / p
+                y = probe_sin_1[time_step][j]
+                pts_curve_2.append(axis_1.c2p(x, y))
+
+            curve_2 = VMobject(stroke_width=3)
+            curve_2.set_points_smoothly(pts_curve_2)
+            curve_2.set_color(RED)
+        
+
+            self.add(curve_1, curve_2)
+            self.wait(0.1)
+            self.remove(curve_1, curve_2)
+
+
+
+
+
+        self.wait(20)
+        self.embed() 
 
 
 
