@@ -244,7 +244,7 @@ def make_fourier_surf_func(axes, comp_func):
     return func
 
 
-class P44_58(InteractiveScene):
+class P44_58b(InteractiveScene):
     def construct(self): 
         '''
         Big 2d scene, building up to most zoomed out view. 
@@ -438,30 +438,30 @@ class P44_58(InteractiveScene):
 
 
         # TURN BACK ON THESE SWEEPS IN FINAL RENDER
-        #Ok x sweep:
-        # magic_indices=np.arange(0, len(activations['x']), 113)
+        # Ok x sweep:
+        magic_indices=np.arange(0, len(activations['x']), 113)
 
-        # for i in magic_indices:
-        #     draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
-        #     draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-        #     draw_attention_values(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_mlp_1(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_mlp_2(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     self.wait(0.2)
+        for i in magic_indices:
+            draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
+            draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            draw_attention_values(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_mlp_1(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_mlp_2(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            self.wait(0.2)
 
-        # self.wait()
-        # #Now y sweep
-        # for i in range(113):
-        #     draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
-        #     draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-        #     draw_attention_values(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_mlp_1(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     draw_mlp_2(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
-        #     self.wait(0.2)
+        self.wait()
+        #Now y sweep
+        for i in range(113):
+            draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
+            draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+            draw_attention_values(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_mlp_1(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            draw_mlp_2(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.0, colormap=black_to_tan_hex)
+            self.wait(0.2)
 
-        # self.wait()
+        self.wait()
         #Ok yeah these sweepse are pretty slow lol. 
 
 
@@ -619,6 +619,7 @@ class P56a_neuron_100(InteractiveScene):
 
         self.wait(20)
         self.embed()
+
 
 class P56a_neuron_101(InteractiveScene):
     '''
@@ -909,7 +910,7 @@ class P56_logits(InteractiveScene):
 
 
 
-class P52_54_3D(InteractiveScene):
+class P52_54_3Df(InteractiveScene):
     def construct(self): 
 
         # Kinda digging the idea of "bringing the strongest components from each "over to the side"
@@ -1008,6 +1009,7 @@ class P52_54_3D(InteractiveScene):
         )
         surf_1_component.set_color(ORANGE).set_shading(0.1, 0.5, 0.5)
         axes_1_group=Group(axes_1[:2], x_label, y_label, ts, surf_1_component)
+        axes_1_group.rotate(3*DEGREES, [-1, -1, 0])
 
 
         #Ok now let's add the sin-sin surface. 
@@ -1053,15 +1055,18 @@ class P52_54_3D(InteractiveScene):
         surf_2_component_flipped.set_color('#00AAAA').set_shading(0.1, 0.5, 0.5) 
 
         axes_2_group=Group(axes_2[:2], x_label_2, y_label_2, ts2, surf_2_component, surf_2_component_flipped)
-        axes_2_group.move_to([1.2, -1.2, -15])
+        axes_2_group.move_to([1.7, -1.7, -17.5])
     
 
         axes_2_group.rotate(25*DEGREES, [1, -1, 0]) #Tilt up and scale to compensate for FOV
-        axes_2_group.scale(1.8)
+        axes_2_group.rotate(7*DEGREES, [-1, -1, 0])
+        axes_2_group.scale(1.7)
 
         # self.frame.reorient(134, 42, 0, (1.31, 1.43, -2.65), 11.48) #Where P45 scene below ends right now. 
         # self.frame.reorient(135, 42, 0, (1.62, 1.74, -3.08), 12.34)
-        self.frame.reorient(132, 45, 0, (-0.42, 4.11, -3.43), 12.94)
+        # self.frame.reorient(132, 45, 0, (-0.42, 4.11, -3.43), 12.94)
+        # self.frame.reorient(132, 45, 0, (-0.47, 5.38, -4.24), 15.03)
+        self.frame.reorient(132, 45, 0, (-0.72, 5.18, -3.92), 14.30)
 
         self.add(axes_1_group[:4])
         self.wait()
@@ -1075,10 +1080,12 @@ class P52_54_3D(InteractiveScene):
         #Ok first thing to do will be to bring over the strongest frequency component of the top surface
         #Probably stick with orange, then do the same thing for the bottom surface
 
+        ha=-1.2 #Horizontal adjustment
 
         self.wait()
         self.add(surf_1_component)
-        self.play(surf_1_component.animate.move_to([-7.0, 7.0, 0]).rotate(5*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1]), 
+        self.play(surf_1_component.animate.move_to([-7.0-ha, 7.0+ha, 0]).rotate(5*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1]),
+                 rate_func=linear,  
                  run_time=4)
         # surf_1_component.rotate(5*DEGREES, [1, -1, 0])
         # surf_1_component.rotate(3*DEGREES, [1, 1, 0])
@@ -1095,7 +1102,8 @@ class P52_54_3D(InteractiveScene):
         surf_2_component.shift([0, 0, -0.42])
         self.add(surf_2_component)
 
-        self.play(surf_2_component.animate.move_to([-7.4, 7.4, -2.5]).scale(1/1.8).rotate(-20*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1]), 
+        self.play(surf_2_component.animate.move_to([-7.2-ha, 7.2+ha, -2.5]).scale(1/1.7).rotate(-20*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1]), 
+                 rate_func=linear, 
                  run_time=4)
         # surf_1_component.rotate(5*DEGREES, [1, -1, 0])
         # surf_1_component.rotate(3*DEGREES, [1, 1, 0])
@@ -1105,7 +1113,7 @@ class P52_54_3D(InteractiveScene):
         # self.add(axes_2_group[3])
 
         #Now flip second surface
-        surf_2_component_flipped.move_to([-7.4, 7.4, -2.5]).scale(1/1.8).rotate(-20*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1])
+        surf_2_component_flipped.move_to([-7.2-ha, 7.2+ha, -2.5]).scale(1/1.7).rotate(-20*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1])
 
         # self.add(surf_2_component_flipped)
         # Cool now animate to this. 
@@ -1128,9 +1136,9 @@ class P52_54_3D(InteractiveScene):
         )
         combined_surf.set_color(GREEN).set_shading(0.1, 0.5, 0.5)
         # self.add(combined_surf)
-
+        combined_surf.scale(1.05)
         combined_surf.rotate(5*DEGREES, [1, -1, 0]).rotate(5*DEGREES, [1, 1, 0]).rotate(-10*DEGREES, [0, 0, 1])
-        combined_surf.move_to([-7.75, 7.75, -6])
+        combined_surf.move_to([-7.5-ha, 7.5+ha, -6])
 
         
         self.wait()
@@ -1315,7 +1323,7 @@ class P49_51_3D(InteractiveScene):
 
 
 
-class P45_3D(InteractiveScene):
+class P45_3Db(InteractiveScene):
     def construct(self): 
 
         mlp_hook_pre=np.load(data_dir/'mlp_hook_pre.npy')
@@ -1455,6 +1463,24 @@ class P45_3D(InteractiveScene):
                   run_time=10)
 
         self.wait()
+
+        #Add a little pan-around action
+        # self.play(self.frame.animate.reorient(120, 50, 0, (-0.4, -0.43, -0.72), 8.05), run_time=3, rate_func=linear)
+        # self.play(self.frame.animate.reorient(152, 51, 0, (-0.4, -0.43, -0.72), 8.05), run_time=3, rate_func=linear)
+        # self.play(self.frame.animate.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05), run_time=3, rate_func=linear)
+        # self.frame.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05)
+
+        self.play(self.frame.animate.reorient(61, 53, 0, (-0.4, -0.43, -0.72), 8.05), run_time=6)
+        self.play(self.frame.animate.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05), run_time=6)
+
+        
+        # self.play(Succession(
+        #     self.frame.animate.reorient(120, 50, 0, (-0.4, -0.43, -0.72), 8.05).set_anim_args(run_time=3, rate_func=smooth),
+        #     self.frame.animate.reorient(152, 51, 0, (-0.4, -0.43, -0.72), 8.05).set_anim_args(run_time=3, rate_func=smooth),
+        #     self.frame.animate.reorient(132, 36, 0, (-0.4, -0.43, -0.72), 8.05).set_anim_args(run_time=3, rate_func=smooth),
+        # ))
+        # self.wait()
+
         self.remove(pts_1_y, pts_1_x)
         self.wait()
 
@@ -1663,9 +1689,9 @@ class P45_3D(InteractiveScene):
         # At that point sometning like this should kinda work - I can figure out in a bit
         # if I need to make some of these shift earlier
         # x/y labels get a bit funky with rotation, will probably have to noodle on that. 
-        axes_1_group.move_to([5, 0, 0])
-        axes_1_group.rotate(-20*DEGREES, [0, 0, 1])
-        axes_1_group.rotate(35*DEGREES, [1, 0, 0])
+        # axes_1_group.move_to([5, 0, 0])
+        # axes_1_group.rotate(-20*DEGREES, [0, 0, 1])
+        # axes_1_group.rotate(35*DEGREES, [1, 0, 0])
 
 
         self.wait(20)

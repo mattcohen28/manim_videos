@@ -228,7 +228,7 @@ class P25_26(InteractiveScene):
 
         # Now add some arrows/backet in illustrator in editing
         # Now add "one plus two" one step at a time
-        example_index=117
+        example_index=115
 
 
         draw_inputs(self, activations, all_svgs, reset=False, example_index=example_index, wait=0.2)

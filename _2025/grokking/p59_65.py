@@ -244,7 +244,7 @@ def make_fourier_surf_func(axes, comp_func):
     return func
 
 
-class P59_mlp_surface_1(InteractiveScene):
+class P59_mlp_surface_1b(InteractiveScene):
     def construct(self): 
         p=113
         neuron_idx=341
@@ -282,7 +282,8 @@ class P59_mlp_surface_1(InteractiveScene):
         # self.frame.reorient(43, 57, 0, (-0.15, -0.07, -0.33), 6.60)
         # self.frame.reorient(43, 42, 0, (0.07, -0.2, -0.58), 6.21)
         # self.frame.reorient(45, 45, 0, (-0.07, -0.17, -0.49), 6.21)
-        self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
+        # self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
+        self.frame.reorient(45, 57, 0, (-0.07, -0.17, -0.49), 6.21)
         self.add(axes_1[:2]) #Leaving out x and y for now. 
 
         for time_step in range(1000):
@@ -316,7 +317,7 @@ class P59_mlp_surface_1(InteractiveScene):
         self.embed()
 
 
-class P59_mlp_surface_2(InteractiveScene):
+class P59_mlp_surface_2b(InteractiveScene):
     def construct(self): 
         p=113
         neuron_idx=106
@@ -355,7 +356,8 @@ class P59_mlp_surface_2(InteractiveScene):
         # self.frame.reorient(43, 42, 0, (0.07, -0.2, -0.58), 6.21)
         # self.frame.reorient(45, 45, 0, (-0.07, -0.17, -0.49), 6.21)
         # self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
-        self.frame.reorient(49, 47, 0, (-0.07, -0.17, -0.49), 6.21)
+        # self.frame.reorient(49, 47, 0, (-0.07, -0.17, -0.49), 6.21)
+        self.frame.reorient(45, 57, 0, (-0.07, -0.17, -0.49), 6.21)
         self.add(axes_1[:2]) #Leaving out x and y for now. 
 
         for time_step in range(1000):
@@ -388,7 +390,7 @@ class P59_mlp_surface_2(InteractiveScene):
         self.wait(20)
         self.embed()
 
-class P59_mlp_surface_3(InteractiveScene):
+class P59_mlp_surface_3b(InteractiveScene):
     def construct(self): 
         p=113
         neuron_idx=1
@@ -426,7 +428,8 @@ class P59_mlp_surface_3(InteractiveScene):
         # self.frame.reorient(43, 57, 0, (-0.15, -0.07, -0.33), 6.60)
         # self.frame.reorient(43, 42, 0, (0.07, -0.2, -0.58), 6.21)
         # self.frame.reorient(45, 45, 0, (-0.07, -0.17, -0.49), 6.21)
-        self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
+        # self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
+        self.frame.reorient(45, 57, 0, (-0.07, -0.17, -0.49), 6.21)
         self.add(axes_1[:2]) #Leaving out x and y for now. 
 
         for time_step in range(1000):
@@ -460,7 +463,7 @@ class P59_mlp_surface_3(InteractiveScene):
         self.embed()
 
 
-class P59_mlp_surface_4(InteractiveScene):
+class P59_mlp_surface_4b(InteractiveScene):
     def construct(self): 
         p=113
         neuron_idx=7
@@ -499,7 +502,8 @@ class P59_mlp_surface_4(InteractiveScene):
         # self.frame.reorient(43, 42, 0, (0.07, -0.2, -0.58), 6.21)
         # self.frame.reorient(45, 45, 0, (-0.07, -0.17, -0.49), 6.21)
         # self.frame.reorient(45, 44, 0, (-0.07, -0.17, -0.49), 6.21)
-        self.frame.reorient(49, 47, 0, (-0.07, -0.17, -0.49), 6.21)
+        # self.frame.reorient(49, 47, 0, (-0.07, -0.17, -0.49), 6.21)
+        self.frame.reorient(45, 57, 0, (-0.07, -0.17, -0.49), 6.21)
         self.add(axes_1[:2]) #Leaving out x and y for now. 
 
         for time_step in range(1000):
