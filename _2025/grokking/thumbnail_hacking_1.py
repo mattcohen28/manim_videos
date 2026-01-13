@@ -331,7 +331,8 @@ class P28_31h(InteractiveScene):
         #Hmm probably makes sense to remove mean here and from scatter plots - not a big deal.
 
         all_pts=VGroup()
-        neuron_indices=[0, 3, 4, 2, 11, 5, 9]
+        # neuron_indices=[0, 3, 4, 2, 11, 5, 9] #Thumnail noodlin
+        neuron_indices=[0, 3, 4, 5, 9, 2, 11]
         for i, neuron_idx in enumerate(neuron_indices):
             neuron_average=activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx].mean()
             neuron_max=np.max(np.abs(activations['blocks.0.mlp.hook_pre'][:p, 2, neuron_idx]-neuron_average))*1.0 #Might want to bring down
@@ -352,21 +353,21 @@ class P28_31h(InteractiveScene):
         # Now how do I sweep through varoius inputs, while changing outputs and adding points to the scatter plot?
 
         #We're on 0,0 go ahead and add this sucker
-        for i in range(7):
-            self.add(all_pts[i][0])
-            self.wait(0.1)
-        for i in range(1, p):
-            draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
-            draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-            draw_attention_values(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-            draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-            self.remove(all_svgs[7]); self.add(all_svgs[7])
-            draw_mlp_1(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-            draw_mlp_2(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
-            for j in range(7):
-                self.add(all_pts[j][i])
-            self.wait(0.2)
-        self.wait()
+        # for i in range(7):
+        #     self.add(all_pts[i][0])
+        #     self.wait(0.1)
+        # for i in range(1, p):
+        #     draw_inputs(self, activations, all_svgs, reset=False, example_index=i, wait=0)
+        #     draw_embeddings(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+        #     draw_attention_values(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+        #     draw_attention_patterns(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+        #     self.remove(all_svgs[7]); self.add(all_svgs[7])
+        #     draw_mlp_1(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+        #     draw_mlp_2(self, activations, all_svgs, reset=False, example_index=i, wait=0, colormap=black_to_tan_hex)
+        #     for j in range(7):
+        #         self.add(all_pts[j][i])
+        #     self.wait(0.2)
+        # self.wait()
 
         # Ok this should be the most complicated part
         # First color points using viridis following p
@@ -375,12 +376,12 @@ class P28_31h(InteractiveScene):
         # Ok but first, let's color!
 
         #My god this is slow lol - removing temporarily
-        for i in range(p):
-            for j in range(7):
-                c=viridis_hex(i, 0, p)
-                all_pts[j][i].set_color(c)
-                self.wait(0.1)
-        self.wait()
+        # for i in range(p):
+        #     for j in range(7):
+        #         c=viridis_hex(i, 0, p)
+        #         all_pts[j][i].set_color(c)
+        #         self.wait(0.1)
+        # self.wait()
 
 
         # Ok now for axes here, I think start with just making a 7x7 grid of axes with the same spacing
@@ -428,6 +429,14 @@ class P28_31h(InteractiveScene):
 
         self.wait()
 
+
+        #Thumbnail noodlin
+        self.frame.reorient(0, 0, 0, (8.0, 1.98, 0.0), 3.06)
+
+
+
+
+
         self.play(self.frame.animate.reorient(0, 0, 0, (7.62, 0.06, 0.0), 7.58),
                   Write(axes_2), 
                   run_time=4) #Pan over 
@@ -457,6 +466,11 @@ class P28_31h(InteractiveScene):
         #P31 - Ok, now roll back the clock on all these plots -> let's go! 500 or 1000 is probably good, let's target 500. 
         activation_history=np.load(str(data_dir/'time_history_mlp_hook_pre_1.npy'))
         #activation_history.shape (2000, 113, 3, 512)
+
+
+        #Thumnail
+        self.frame.reorient(0, 0, 0, (9.28, 1.03, 0.0), 5.22)
+        self.remove(axes_2)
         
 
         for step_count in tqdm(np.arange(999, -1, -1)):
