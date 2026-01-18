@@ -1,5 +1,7 @@
 from manimlib import *
 from tqdm import tqdm
+import re
+from pathlib import Path
 
 CHILL_BROWN='#948979'
 YELLOW='#ffd35a'
@@ -12,23 +14,35 @@ FRESH_TAN='#dfd0b9'
 CYAN='#00FFFF'
 MAGENTA='#FF00FF'
 
+# games_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/bitter_lesson/games/alpha_go_self_play')
+games_dir=Path('/Users/stephen/Stephencwelch Dropbox/welch_labs/bitter_lesson/games/human_human_kgs-19-2015')
+
 size = 19  # 19x19 board
 padding = 0.5
 board_width = 8 # Total width in Manim units
 step = board_width / size
 
-# def create_stone(x, y, color=BLACK):
-#     stone_radius=step*0.45
-#     pos = [(-(size-1)/2 + x) * step, (-(size-1)/2 + y) * step, 0]
-#     stone = Circle(radius=stone_radius, fill_color=color, fill_opacity=1)
-#     stone.set_stroke(color=BLACK, width=0.5)
+
+
+def parse_sgf(file_path):
+    with open(file_path, 'r') as f:
+        content = f.read()
     
-#     # Add a "shine" for the white stones or a "matte" highlight for black
-#     shine_color = WHITE if color == BLACK else GREY_B
-#     shine = Dot(radius=stone_radius*0.3, fill_color=shine_color, fill_opacity=0.3)
-#     shine.move_to(stone.get_center() + stone_radius*0.3*(UP+LEFT))
+    # Regex to find B[xx] or W[xx]
+    moves = re.findall(r"([BW])\[([a-s]{2})\]", content)
     
-#     return Group(stone, shine).move_to(pos)
+    parsed_moves = []
+    for color_char, coords in moves:
+        # Convert letters to 0-18 integers
+        x = ord(coords[0]) - ord('a')
+        y = ord(coords[1]) - ord('a')
+        # Flip Y because SGF is top-down, Manim is bottom-up
+        y = 18 - y 
+        
+        color = BLACK if color_char == 'B' else WHITE
+        parsed_moves.append((x, y, color))
+    return parsed_moves
+
 
 
 def create_stone(x, y, color=BLACK):
@@ -102,15 +116,58 @@ class GoHackingOne(InteractiveScene):
         self.add(lines)
         self.add(hoshi_dots)
 
-        black_1 = create_stone(14, 16, BLACK)
-        white_1 = create_stone(4, 4, WHITE)
-        black_2 = create_stone(15, 3, BLACK)
-        white_2 = create_stone(15, 4, WHITE)
+        # moves = parse_sgf(games_dir/'alpha_go_self_play/1c.sgf')
+        p=list(games_dir.glob('*.sgf'))[0]
+        moves = parse_sgf(p)
 
-        self.add(black_1, white_1, black_2, white_2)
+        self.wait()
+        for i, (x, y, color) in enumerate(moves):
+            stone = create_stone(x, y, color)
+            self.add(stone)
+            # self.wait(0.1)
 
-        #Ok, not bad vidually! Next I can work on importing games. 
+        self.wait()
+
+        # i=10
+        # x, y, color=moves[i]
+
+
+        # stone = create_stone(x, y, color)
+            
+            # Animating the stone "dropping" from a hand
+        # We start it slightly higher (Z-axis) and fade it in
+        # Woudl be maybe cool in some scense to animate stones being placed down
+        # stone.shift(0.5 * OUT) 
+        # self.play(
+        #     stone.animate.shift(0.5 * IN),
+        #     FadeIn(stone),
+        #     run_time=1.0, # if i < 10 else 0.1 # Speed up as game progresses
+        # )
+    
+
+        # black_1 = create_stone(14, 16, BLACK)
+        # white_1 = create_stone(4, 4, WHITE)
+        # black_2 = create_stone(15, 3, BLACK)
+        # white_2 = create_stone(15, 4, WHITE)
+
+        # self.add(black_1, white_1, black_2, white_2)
+
+        #Ok, not bad visually! Next I can work on importing games. 
         #A transition from a ncie overhead shot to this could be pretty dope. 
+
+
+
+
+
+
+
+        self.wait()
+        self.embed()
+
+
+
+
+
 
         # black_1.set_color(BLACK)
         # white_1.set_color('#F5F5F5')
@@ -124,12 +181,6 @@ class GoHackingOne(InteractiveScene):
         # # Try these additional methods if available:
         # white_2.set_gloss(0.8)
         # white_2.set_shadow(0.3)
-
-
-        self.wait()
-        self.embed()
-
-
 
 
 
